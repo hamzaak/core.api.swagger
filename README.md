@@ -1,2 +1,4 @@
-# Core API Swagger
-An example of using swagger with .net core api
+# Core API Swagger-NSwag
+
+* Using swagger with .NET Core API
+* Using Nswag to auto-generate client code (to generate client objects just build Core.Api.Swagger.Client project)
