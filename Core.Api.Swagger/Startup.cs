@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using NJsonSchema;
+using NSwag.AspNetCore;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Core.Api.Swagger
@@ -24,7 +26,7 @@ namespace Core.Api.Swagger
         public void ConfigureServices(IServiceCollection services)
         {
             // Configuring entity framework
-            services.AddDbContext<ApiContext>(opt => opt.UseInMemoryDatabase());
+            services.AddDbContext<ApiContext>(opt => opt.UseInMemoryDatabase("CoreAPI"));
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -51,22 +53,22 @@ namespace Core.Api.Swagger
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Core API V1");
             });
-            
-            app.UseMvc(routes =>
+
+            app.UseMvc();
+
+            // Enable the Swagger UI middleware and the Swagger generator
+            app.UseSwaggerUi3WithApiExplorer(settings =>
             {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Accounts}/{action=Index}/{id?}");
+                settings.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "Example API";
+                    document.Info.Description = "REST API for example.";
+                };
+                settings.GeneratorSettings.DefaultPropertyNameHandling =
+                    PropertyNameHandling.CamelCase;
             });
         }
-
-        private static void AddTestData(ApiContext context)
-        {
-            context.Accounts.Add(new Data.DomainModels.Account { Name = "Account 1", Balance = 2000 });
-            context.Accounts.Add(new Data.DomainModels.Account { Name = "Account 2", Balance = 5500 });
-            context.Accounts.Add(new Data.DomainModels.Account { Name = "Account 3", Balance = 3750 });
-
-            context.SaveChanges();
-        }
+        
     }
 }
